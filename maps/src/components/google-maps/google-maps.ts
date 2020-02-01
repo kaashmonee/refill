@@ -111,7 +111,7 @@ export class GoogleMapsComponent {
         return new Promise((resolve, reject) => {
             Geolocation.getCurrentPosition().then((position) => {
                 console.log(position);
-                let latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                let latLng = new google.maps.LatLng(40.440624, -79.995888);
                 let mapOptions = {
                     center: latLng,
                     zoom: 15

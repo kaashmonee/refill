@@ -4,13 +4,13 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class MapsProvider {
 
-  host : string = "13.58.236.117";
+  host : string = "http://13.58.236.117:5000";
 
   constructor(public http: HttpClient) {}
 
   getAllWaters() {
     let promise = new Promise((resolve, reject) => {
-      this.http.get(this.host + '/all').subscribe((data) => {
+      this.http.get(this.host + '/all').subscribe((data : any[]) => {
         resolve(data);
       }, (err) => {
         reject();
