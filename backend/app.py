@@ -90,11 +90,43 @@ def upload_new_location():
         return Response("Data bad!", status=400)
 
 
-@app.route("/update_rating", methods=["PUT"])
+@app.route("/get_by_name", methods=["GET"])
+def return_resource_by_name():
+    """
+    This function returns the resource specified by the name in the get request.
+    """
+    pass
+
+
+@app.route("/get_uid", methods=["GET"])
+def return_uid_resource():
+    """
+    This endpoint should return the resource with the specified UID. 
+    """
+    pass
+
+
+@app.route("/update_rating", methods=["POST"])
 def update_rating():
-    location = db_data.col.find_one({"name": request.json["name"]})
-    location["gross_rating"] += request.json["gross_rating"]
-    location["num_votes"] += 1
+    """
+    This function simply updates the gross rating of the location.
+    """
+    name = request.json["name"]
+    gross_rating = request.json["gross_rating"]
+
+    result = db_data.col.update_one(
+        {"name": name}, 
+        {
+            "$set": {"gross_rating": gross_rating},
+            "$inc": {"num_votes": 1}
+        }, 
+        upsert=False
+    )
+
+
+
+    return Response(str(result), status=200, mimetype="application/json")
+
 
 
 
