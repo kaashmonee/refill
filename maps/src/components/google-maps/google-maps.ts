@@ -17,16 +17,15 @@ export class GoogleMapsComponent {
     private mapsLoaded: boolean = false;
     private networkHandler = null;
 
-    constructor(private renderer: Renderer2, private element: ElementRef, @Inject(DOCUMENT) private _document){
+    //directionsService = new google.maps.DirectionsService;
+    //directionsDisplay = new google.maps.DirectionsRenderer;
 
+    constructor(private renderer: Renderer2, private element: ElementRef, @Inject(DOCUMENT) private _document){
+       
     }
 
-    ngOnInit(){
-        this.init().then((res) => {
-            console.log("Google Maps ready.")
-        }, (err) => {
-            console.log(err);
-        });
+    start(){
+        return this.init();
     }
 
     private init(): Promise<any> {
@@ -111,13 +110,14 @@ export class GoogleMapsComponent {
         return new Promise((resolve, reject) => {
             Geolocation.getCurrentPosition().then((position) => {
                 console.log(position);
-                let latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                let latLng = new google.maps.LatLng(40.440624, -79.995888);
                 let mapOptions = {
                     center: latLng,
                     zoom: 15
                 };
 
                 this.map = new google.maps.Map(this.element.nativeElement, mapOptions);
+		//this.directionsDisplay.setMap(this.map);
                 resolve(true);
             }, (err) => {
                 reject('Could not initialise map');
@@ -125,15 +125,47 @@ export class GoogleMapsComponent {
         });
     }
 
-    public addMarker(lat: number, lng: number): void {
+    public calculateAndDisplayRoute(lat, lng) {
+	console.log("bumbit is gay");
+        const that = this;
+        this.directionsService.route({
+          origin: new google.maps.LatLng(40.440624, -79.995888),
+          destination: new google.maps.LatLng(lat, lng)
+        }, (response, status) => {
+          if (status === 'OK') {
+            that.directionsDisplay.setDirections(response);
+          } else {
+            window.alert('Directions request failed due to ' + status);
+          }
+        });
+    }
+
+    static openMarker: google.maps.InfoWindow=null;
+
+    public addMarker(lat:number, lng:number, name:string, image:string, gross_rating, num_votes): void {
         let latLng = new google.maps.LatLng(lat, lng);
-        let marker = new google.maps.Marker({
+	let data = name + "<br/>" + (gross_rating/num_votes);
+
+        var marker = new google.maps.Marker({
             map: this.map,
             animation: google.maps.Animation.DROP,
             position: latLng
         });
 
+	let infowindow = new google.maps.InfoWindow({
+		content: "<div style='float:left'><img src='"+image+"' width=300 height=200></div>"+data
+	});
+	const that = this;
+
+	google.maps.event.addListener(marker, 'click', function() {
+		if (GoogleMapsComponent.openMarker != null)
+		    GoogleMapsComponent.openMarker.close();
+		infowindow.open(this.map, marker);
+		GoogleMapsComponent.openMarker = infowindow;
+		that.calculateAndDisplayRoute(lat, lng);
+	});
+
+
         this.markers.push(marker);
     }
-
 }
