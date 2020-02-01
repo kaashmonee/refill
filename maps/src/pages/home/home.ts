@@ -11,14 +11,20 @@ export class HomePage {
     @ViewChild(GoogleMapsComponent) mapComponent: GoogleMapsComponent;
 
     constructor(public mp : MapsProvider) {
-      mp.getAllWaters().then((data:any[]) => {
-	for (var i = 0; i < data.length; i++)
-	{
-            this.mapComponent.addMarker(data[i]["lat"], data[i]["lng"]);
-	}
-        console.log(data);
-      }, (err) => {
-        // IDK, this is a yikes
+
+    }
+
+    ionViewDidLoad() {
+      this.mapComponent.start().then(() => {
+      	this.mp.getAllWaters().then((data:any[]) => {
+	  for (var i = 0; i < data.length; i++)
+	  {
+            this.mapComponent.addMarker(data[i]["latitude"], data[i]["longitude"]);
+	  }
+          console.log(data);
+        }, (err) => {
+          // IDK, this is a yikes
+        });
       });
     }
 

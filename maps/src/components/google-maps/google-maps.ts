@@ -21,12 +21,8 @@ export class GoogleMapsComponent {
 
     }
 
-    ngOnInit(){
-        this.init().then((res) => {
-            console.log("Google Maps ready.")
-        }, (err) => {
-            console.log(err);
-        });
+    start(){
+        return this.init();
     }
 
     private init(): Promise<any> {
