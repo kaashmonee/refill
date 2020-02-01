@@ -17,8 +17,11 @@ export class GoogleMapsComponent {
     private mapsLoaded: boolean = false;
     private networkHandler = null;
 
-    constructor(private renderer: Renderer2, private element: ElementRef, @Inject(DOCUMENT) private _document){
+    //directionsService = new google.maps.DirectionsService;
+    //directionsDisplay = new google.maps.DirectionsRenderer;
 
+    constructor(private renderer: Renderer2, private element: ElementRef, @Inject(DOCUMENT) private _document){
+       
     }
 
     start(){
@@ -114,10 +117,26 @@ export class GoogleMapsComponent {
                 };
 
                 this.map = new google.maps.Map(this.element.nativeElement, mapOptions);
+		//this.directionsDisplay.setMap(this.map);
                 resolve(true);
             }, (err) => {
                 reject('Could not initialise map');
             });
+        });
+    }
+
+    public calculateAndDisplayRoute(lat, lng) {
+	console.log("bumbit is gay");
+        const that = this;
+        this.directionsService.route({
+          origin: new google.maps.LatLng(40.440624, -79.995888),
+          destination: new google.maps.LatLng(lat, lng)
+        }, (response, status) => {
+          if (status === 'OK') {
+            that.directionsDisplay.setDirections(response);
+          } else {
+            window.alert('Directions request failed due to ' + status);
+          }
         });
     }
 
@@ -136,15 +155,17 @@ export class GoogleMapsComponent {
 	let infowindow = new google.maps.InfoWindow({
 		content: "<div style='float:left'><img src='"+image+"' width=300 height=200></div>"+data
 	});
+	const that = this;
 
 	google.maps.event.addListener(marker, 'click', function() {
 		if (GoogleMapsComponent.openMarker != null)
 		    GoogleMapsComponent.openMarker.close();
 		infowindow.open(this.map, marker);
 		GoogleMapsComponent.openMarker = infowindow;
+		that.calculateAndDisplayRoute(lat, lng);
 	});
+
 
         this.markers.push(marker);
     }
-
 }
