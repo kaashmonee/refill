@@ -4,6 +4,7 @@ import pymongo
 import json
 import datetime
 import base64
+import uuid
 
 from bson.json_util import dumps
 
@@ -41,6 +42,10 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".",1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def generate_image_path(location_name):
+    img_file_name = str(location_name) + hash(datetime.datetime.utcnow())
+    return UPLOAD_FOLDER + "/" + img_file_name
+
 @app.route("/new", methods=["POST"])
 def upload_new_location():
     """
@@ -53,23 +58,11 @@ def upload_new_location():
     lat = request.form["latitude"]
     long = request.form["longitude"]
     rating = request.form["gross_rating"]
-    image_file = request.form["image"]
+    b64image = request.form["image"]
     
-    """
-    # file upload
-    if 'file' not in request.files:
-        flash("No file part")
-        return "error no file provided"
-
-    file = request.files["file"]
-    if file.filename == "":
-        return "error no filename provided"
-
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-        image_path = url_for("uploaded_file", filename=filename)
-    """
+    with open(generate_image_path(location_name), "wb") as fh:
+        fh.write(b64img.decode("base64"))
+    
 
     # Crafting a location object to insert into the database
     location = {
