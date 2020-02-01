@@ -1,8 +1,0 @@
-{
-  "appId": "com.guinea",
-  "appName": "Refill",
-  "bundledWebRuntime": false,
-  "npmClient": "npm",
-  "webDir": "www",
-  "cordova": {}
-}

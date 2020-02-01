@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Refill</string>
-    <string name="title_activity_main">Refill</string>
-    <string name="package_name">com.guinea</string>
-    <string name="custom_url_scheme">com.guinea</string>
-</resources>
