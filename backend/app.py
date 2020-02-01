@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import Response
+from flask import request
 import pymongo
 import json
 import datetime
@@ -8,7 +9,8 @@ import uuid
 
 from bson.json_util import dumps
 
-UPLOAD_FOLDER = '/assets/'
+
+UPLOAD_FOLDER = './assets'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
@@ -16,22 +18,21 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 mongo = pymongo.MongoClient('mongodb+srv://admin:admin@cluster0-uba4z.mongodb.net/db?retryWrites=true&w=majority', maxPoolSize=50, connect=True)
 
 
-class DB: pass
-
+class DB: 
+    def __init__(self):
+        self.db = pymongo.database.Database(mongo, 'db')
+        self.col = pymongo.collection.Collection(self.db, 'waters') 
+        self.cursor = self.col.find({})
+        
 db_data = DB()
-
 
 @app.route("/all")
 def all():
-    db = pymongo.database.Database(mongo, 'db')
-    col = pymongo.collection.Collection(db, 'waters') 
-    cursor = col.find({})
     
-    db_data.db = db
-    db_data.col = col
-    db_data.cursor = cursor
+    response = Response(dumps(db_data.col.find({})), mimetype='application/json')
+    response.headers.add("Access-Control-Allow-Origin", "*")
 
-    return Response(dumps(col.find({})), mimetype='application/json')
+    return response 
 
 
 def allowed_file(filename):
@@ -43,8 +44,9 @@ def allowed_file(filename):
 
 
 def generate_image_path(location_name):
-    img_file_name = str(location_name) + hash(datetime.datetime.utcnow())
+    img_file_name = str(location_name) + str(hash(datetime.datetime.utcnow()))
     return UPLOAD_FOLDER + "/" + img_file_name
+
 
 @app.route("/new", methods=["POST"])
 def upload_new_location():
@@ -53,15 +55,18 @@ def upload_new_location():
     """
     if request.method != "POST":
         raise Exception("Non POST request to POST endpoint /new")
-
-    name = request.form["name"]
-    lat = request.form["latitude"]
-    long = request.form["longitude"]
-    rating = request.form["gross_rating"]
-    b64image = request.form["image"]
     
-    with open(generate_image_path(location_name), "wb") as fh:
-        fh.write(b64img.decode("base64"))
+
+    name = request.json["name"]
+    lat = request.json["latitude"]
+    long = request.json["longitude"]
+    rating = request.json["gross_rating"]
+    b64image = request.json["image"]
+    
+     
+    image_path = generate_image_path(name)
+    with open(image_path, "wb") as fh:
+        fh.write(base64.b64decode(b64image))
     
 
     # Crafting a location object to insert into the database
@@ -79,17 +84,18 @@ def upload_new_location():
     location_id = locations.insert_one(location).inserted_id
     
     if location:
-    # successful
-        return Response(location_id, status=200, mimetype="application/json")
+        # successful
+        return Response(str(location_id), status=200, mimetype="application/json")
     else:
         return Response("Data bad!", status=400)
 
 
+@app.route("/update_rating", methods=["PUT"])
+def update_rating():
+    location = db_data.col.find_one({"name": request.json["name"]})
+    location["gross_rating"] += request.json["gross_rating"]
+    location["num_votes"] += 1
 
-def update_rating(doc_id, rating):
-    loc = get_loc_object(doc_id)
-    loc.gross_rating += rating
-    loc.num_votes += 1
 
 
 if __name__ == "__main__":
