@@ -121,13 +121,28 @@ export class GoogleMapsComponent {
         });
     }
 
-    public addMarker(lat: number, lng: number): void {
+    static openMarker: google.maps.InfoWindow=null;
+
+    public addMarker(lat:number, lng:number, name:string, image:string, gross_rating, num_votes): void {
         let latLng = new google.maps.LatLng(lat, lng);
-        let marker = new google.maps.Marker({
+	let data = name + "<br/>" + (gross_rating/num_votes);
+
+        var marker = new google.maps.Marker({
             map: this.map,
             animation: google.maps.Animation.DROP,
             position: latLng
         });
+
+	let infowindow = new google.maps.InfoWindow({
+		content: "<div style='float:left'><img src='"+image+"' width=300 height=200></div>"+data
+	});
+
+	google.maps.event.addListener(marker, 'click', function() {
+		if (GoogleMapsComponent.openMarker != null)
+		    GoogleMapsComponent.openMarker.close();
+		infowindow.open(this.map, marker);
+		GoogleMapsComponent.openMarker = infowindow;
+	});
 
         this.markers.push(marker);
     }

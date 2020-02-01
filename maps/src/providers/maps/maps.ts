@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class MapsProvider {
 
-  host : string = "http://13.58.236.117:5000";
+  host : string = "http://13.58.236.117:5100";
 
   constructor(public http: HttpClient) {}
 
