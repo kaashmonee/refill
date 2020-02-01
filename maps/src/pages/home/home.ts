@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { GoogleMapsComponent } from '../../components/google-maps/google-maps';
 import { MapsProvider } from '../../providers/maps/maps';
 
@@ -9,6 +9,9 @@ import { MapsProvider } from '../../providers/maps/maps';
 export class HomePage {
 
     @ViewChild(GoogleMapsComponent) mapComponent: GoogleMapsComponent;
+    @ViewChild('map') mapElement: ElementRef;
+    @ViewChild('directionsPanel') directionsPanel: ElementRef;
+    map: any;
 
     constructor(public mp : MapsProvider) {
 
@@ -24,9 +27,49 @@ export class HomePage {
 				       data[i]["image"], data[i]["gross_rating"], data[i]["num_votes"]);
 	  }
           console.log(data);
+	  this.loadMap();
+	  this.startNavigating();
         }, (err) => {
           // IDK, this is a yikes
         });
       });
+    }
+
+    loadMap(){
+
+        let latLng = new google.maps.LatLng(40.4406, -79.9959);
+
+        let mapOptions = {
+          center: latLng,
+          zoom: 15,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+
+        this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
+
+    }
+
+    startNavigating(){
+
+        let directionsService = new google.maps.DirectionsService;
+        let directionsDisplay = new google.maps.DirectionsRenderer;
+
+        directionsDisplay.setMap(this.map);
+        directionsDisplay.setPanel(this.directionsPanel.nativeElement);
+
+        directionsService.route({
+            origin: {lat: 40.4406, lng: -79.9959},
+            destination: {lat: 40.4406, lng: -79.9959},
+            travelMode: google.maps.TravelMode['DRIVING']
+        }, (res, status) => {
+
+            if(status == google.maps.DirectionsStatus.OK){
+                directionsDisplay.setDirections(res);
+            } else {
+                console.warn(status);
+            }
+
+        });
+
     }
 }

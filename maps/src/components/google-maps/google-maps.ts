@@ -17,8 +17,8 @@ export class GoogleMapsComponent {
     private mapsLoaded: boolean = false;
     private networkHandler = null;
 
-    //directionsService = new google.maps.DirectionsService;
-    //directionsDisplay = new google.maps.DirectionsRenderer;
+    directionsService : any;
+    directionsDisplay : any;
 
     constructor(private renderer: Renderer2, private element: ElementRef, @Inject(DOCUMENT) private _document){
        
@@ -117,7 +117,9 @@ export class GoogleMapsComponent {
                 };
 
                 this.map = new google.maps.Map(this.element.nativeElement, mapOptions);
-		//this.directionsDisplay.setMap(this.map);
+                this.directionsService = new google.maps.DirectionsService;
+                this.directionsDisplay = new google.maps.DirectionsRenderer;
+		            this.directionsDisplay.setMap(this.map);
                 resolve(true);
             }, (err) => {
                 reject('Could not initialise map');
@@ -126,11 +128,11 @@ export class GoogleMapsComponent {
     }
 
     public calculateAndDisplayRoute(lat, lng) {
-	console.log("bumbit is gay");
         const that = this;
         this.directionsService.route({
           origin: new google.maps.LatLng(40.440624, -79.995888),
-          destination: new google.maps.LatLng(lat, lng)
+          destination: new google.maps.LatLng(lat, lng),
+          travelMode: 'DRIVING'
         }, (response, status) => {
           if (status === 'OK') {
             that.directionsDisplay.setDirections(response);
