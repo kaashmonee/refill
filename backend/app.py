@@ -2,11 +2,13 @@ from flask import Flask
 from flask import Response
 from flask import request
 import pymongo
+from bson.objectid import ObjectId
 import json
 import datetime
 import base64
 import uuid
 import pprint
+from flask import jsonify
 
 from bson.json_util import dumps
 
@@ -84,27 +86,45 @@ def upload_new_location():
     locations = db_data.col # returns the water collection
     location_id = locations.insert_one(location).inserted_id
     
+    response = ""
     if location:
         # successful
-        return Response(str(location_id), status=200, mimetype="application/json")
+        response = Response(str(location_id), status=200, mimetype="application/json")
     else:
-        return Response("Data bad!", status=400)
+        response = Response("Data bad!", status=400)
+    
+    print(str(location_id))
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
 
 
-@app.route("/get_by_name", methods=["GET"])
+def get_response_from_collection_find(cursor):
+    response = Response(dumps(cursor), status=200)
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
+
+
+@app.route("/get_by_name")
 def return_resource_by_name():
     """
     This function returns the resource specified by the name in the get request.
     """
-    pass
+    name = request.args.get("name")
+    cursor = db_data.col.find({"name": name})
+    print(dumps(cursor))
+
+    return get_response_from_collection_find(cursor)
 
 
-@app.route("/get_uid", methods=["GET"])
+@app.route("/get_by_uid", methods=["GET"])
 def return_uid_resource():
-    """
-    This endpoint should return the resource with the specified UID. 
-    """
-    pass
+    uid = request.args.get("uid")
+    cursor = db_data.col.find({u'_id': ObjectId(uid)})
+
+    print(dumps(cursor))
+
+    # For some reason, the response is empty, and I have no idea why.
+    return get_response_from_collection_find(cursor)
 
 
 @app.route("/update_rating", methods=["POST"])
