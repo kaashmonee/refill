@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import Response
 from flask import request
+from flask import send_from_directory, send_file
 import pymongo
 from bson.objectid import ObjectId
 import json
@@ -13,7 +14,8 @@ from flask import jsonify
 from bson.json_util import dumps
 
 
-UPLOAD_FOLDER = './assets'
+IP = "13.58.236.117:5000"
+UPLOAD_FOLDER = 'assets'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
@@ -43,12 +45,21 @@ def allowed_file(filename):
     Determines if the file extension is one of the allowed image extensions.
     Stolen shamelessly from the flask docs
     """
-    return "." in filename and filename.rsplit(".",1)[1].lower() in ALLOWED_EXTENSIONS
+
+    file_extension = "." in filename and filename.rsplit(".",1)[1].lower()
+    if file_extension in ALLOWED_EXTENSIONS:
+        return file_extension
+    else:
+        return None
 
 
-def generate_image_path(location_name):
-    img_file_name = str(location_name) + str(hash(datetime.datetime.utcnow()))
+def generate_local_image_path(location_name):
+    img_file_name = str(location_name).replace(" ","")
     return UPLOAD_FOLDER + "/" + img_file_name
+
+def generate_global_image_path(location_name):
+    img_file_name = str(location_name).replace(" ","")
+    return "http://" + IP + "/" + UPLOAD_FOLDER + "/" + img_file_name
 
 
 @app.route("/new", methods=["POST"])
@@ -67,9 +78,11 @@ def upload_new_location():
     b64image = request.json["image"]
     
      
-    image_path = generate_image_path(name)
+    image_path = generate_local_image_path(name)
     with open(image_path, "wb") as fh:
         fh.write(base64.b64decode(b64image))
+
+    global_img_path = generate_global_image_path(name)
     
 
     # Crafting a location object to insert into the database
@@ -77,7 +90,7 @@ def upload_new_location():
         "name": name,
         "latitude": lat,
         "longitude": long,
-        "image": image_path, # not a 100% sure how this would work
+        "image": global_img_path, # not a 100% sure how this would work
         "gross_rating": rating,
         "num_votes": 1,
         "last_updated": datetime.datetime.utcnow()
@@ -155,9 +168,8 @@ def update_rating():
 
 @app.route("/assets/<path:path>")
 def send_image(path):
-    ip = "http://13.58.236.117:5000/home/refill/backend"
-    full_path = ip + path
-    return send_from_directory(full_path)
+    return send_file(UPLOAD_FOLDER + "/" + path, mimetype="image/jpeg", as_attachment=True)
+    # return send_from_directory(UPLOAD_FOLDER, path, as_attachment=True)
 
 
 if __name__ == "__main__":
