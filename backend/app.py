@@ -118,6 +118,7 @@ def return_resource_by_name():
 
 @app.route("/get_by_uid", methods=["GET"])
 def return_uid_resource():
+    # Do not use this. it basically doesn't work
     uid = request.args.get("uid")
     cursor = db_data.col.find({u'_id': ObjectId(uid)})
 
