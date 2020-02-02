@@ -108,22 +108,17 @@ export class GoogleMapsComponent {
 
     private initMap(): Promise<any> {
         return new Promise((resolve, reject) => {
-            Geolocation.getCurrentPosition().then((position) => {
-                console.log(position);
-                let latLng = new google.maps.LatLng(40.440624, -79.995888);
-                let mapOptions = {
-                    center: latLng,
-                    zoom: 15
-                };
+            let latLng = new google.maps.LatLng(40.440624, -79.995888);
+            let mapOptions = {
+                center: latLng,
+                zoom: 15
+            };
 
-                this.map = new google.maps.Map(this.element.nativeElement, mapOptions);
-                this.directionsService = new google.maps.DirectionsService;
-                this.directionsDisplay = new google.maps.DirectionsRenderer;
-		            this.directionsDisplay.setMap(this.map);
-                resolve(true);
-            }, (err) => {
-                reject('Could not initialise map');
-            });
+            this.map = new google.maps.Map(this.element.nativeElement, mapOptions);
+            this.directionsService = new google.maps.DirectionsService;
+            this.directionsDisplay = new google.maps.DirectionsRenderer;
+                this.directionsDisplay.setMap(this.map);
+            resolve(true);
         });
     }
 
