@@ -99,7 +99,9 @@ def upload_new_location():
 
 
 def get_response_from_collection_find(cursor):
-    response = Response(dumps(cursor), status=200)
+    cursor_dump = dumps(cursor)
+    print("cursor dump:", cursor_dump)
+    response = Response(cursor_dump, status=200, mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
 
@@ -111,7 +113,6 @@ def return_resource_by_name():
     """
     name = request.args.get("name")
     cursor = db_data.col.find({"name": name})
-    print(dumps(cursor))
 
     return get_response_from_collection_find(cursor)
 
@@ -152,7 +153,11 @@ def update_rating():
 
     return Response(str(result), status=200, mimetype="application/json")
 
-
+@app.route("/assets/<path:path>")
+def send_image(path):
+    ip = "http://13.58.236.117:5000/home/refill/backend"
+    full_path = ip + path
+    return send_from_directory(full_path)
 
 
 if __name__ == "__main__":
