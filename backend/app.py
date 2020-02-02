@@ -6,6 +6,7 @@ import json
 import datetime
 import base64
 import uuid
+import pprint
 
 from bson.json_util import dumps
 
@@ -122,8 +123,11 @@ def update_rating():
         }, 
         upsert=False
     )
-
-
+    
+    # Testing code to make sure this endpoint works.
+    # cursor = db_data.col.find({"name": name})
+    # for doc in cursor:
+    #    pprint.pprint(doc)
 
     return Response(str(result), status=200, mimetype="application/json")
 
