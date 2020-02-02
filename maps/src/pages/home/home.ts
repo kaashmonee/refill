@@ -37,7 +37,7 @@ export class HomePage {
 
     loadMap(){
 
-        let latLng = new google.maps.LatLng(40.4406, -79.9959);
+        let latLng = new google.maps.LatLng(40.4348, -79.9425);
 
         let mapOptions = {
           center: latLng,
@@ -58,8 +58,8 @@ export class HomePage {
         directionsDisplay.setPanel(this.directionsPanel.nativeElement);
 
         directionsService.route({
-            origin: {lat: 40.4406, lng: -79.9959},
-            destination: {lat: 40.4406, lng: -79.9959},
+            origin: {lat: 40.4348, lng: -79.9425},
+            destination: {lat: 40.4348, lng: -79.9425},
             travelMode: google.maps.TravelMode['DRIVING']
         }, (res, status) => {
 
