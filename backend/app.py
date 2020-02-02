@@ -159,6 +159,32 @@ def send_image(path):
     full_path = ip + path
     return send_from_directory(full_path)
 
+@app.route("/query", methods=["GET"])
+def get_neighboring_fountains():
+    """
+    Given clients's position, get info of neighboring fountains
+    """
+    if request.method != "GET":
+        raise Exception("Non GET request to GET endpoint /query")
+    
+    req = request.query_string
+    clat,clong = req.decode('utf-8').split('&')
+    clat = float(clat.split('=')[1])
+    clong = float(clong.split('=')[1])
+    cutoff = 10
+
+    # print(clat,clong)
+    # sorting the database by proximity to the client
+    locs = db_data.col.find()
+    locs = list(locs)
+
+    dists = [(clat-loc['latitude'])**2+(clong-loc['longitude'])**2 for loc in locs]
+    dists = list(enumerate(dists))
+    dists.sort(key=lambda x:x[1])
+    payload = [locs[ind] for ind,_ in dists[:cutoff]]
+
+    return Response(str(payload), status=200, mimetype="application/json")
+
 
 if __name__ == "__main__":
     app.run()
